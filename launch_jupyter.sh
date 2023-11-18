@@ -10,16 +10,28 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 SCRIPT_HOME=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
+partition="debug-gpu"
+job_name="jupyter"
+gpus=1
+
+while getopts p:j:g:h flag
+do
+    case "${flag}" in
+        p) partition=${OPTARG};;
+        j) job_name=${OPTARG};;
+        g) gpus=${OPTARG};;
+        h|*) echo "usage: $0 [-p partition] [-j job_name] [-g gpus]"; exit 1;;
+    esac
+done
+
 sbatch_output=$(sbatch << EOT
 #!/bin/sh
-#SBATCH --job-name=jupyter                                      # Job name
-#SBATCH -p debug-gpu                                            # Partition (queue) name
-#SBATCH --mail-type=ALL                                         # Mail events (NONE, BEGIN, END, FAIL, ALL)
-#SBATCH --mail-user=lu.yuxuan@northeastern.edu                  # Where to send mail	
+#SBATCH --job-name=$job_name                                    # Job name
+#SBATCH -p $partition                                           # Partition (queue) name
 #SBATCH --nodes=1                                               # Number of nodes
-#SBATCH --gpus=1                                                # Number of GPUs to allocate
+#SBATCH --gpus=$gpus                                            # Number of GPUs to allocate
 #SBATCH --time=01:00:00                                         # Time limit hrs:min:sec
-#SBATCH --output=$SCRIPT_HOME/logs/jupyter%j.log   # Standard output and error log
+#SBATCH --output=$SCRIPT_HOME/logs/jupyter%j.log                # Standard output and error log
 
 srun --resv-ports=1 \
     bash << EOF
