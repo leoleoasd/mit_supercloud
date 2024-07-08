@@ -8,7 +8,7 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 SCRIPT_HOME=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
-partition="xeon-p8"
+partition="xeon-g6-volta"
 job_name="tensorboard"
 job_time="08:00:00"
 logdir=runs

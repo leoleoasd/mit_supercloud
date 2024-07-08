@@ -12,7 +12,7 @@ SCRIPT_HOME=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
 partition="xeon-p8"
 job_name="wandb"
-job_time="24:00:00"
+job_time="100:00:00"
 
 while getopts p:j:g:t:h flag
 do
@@ -25,7 +25,7 @@ do
     esac
 done
 
-existing_wandb=$(squeue | grep wandb)
+existing_wandb=$(squeue --json | jq -r '.jobs[] | select(.name == "wandb") | select(.job_state == "RUNNING") .job_id')
 if [ "$existing_wandb" != "" ]; then
     echo "There is already a wandb job running. Probing it's url..."
     forward_name="$(id -un | tr '[A-Z]' '[a-z]')-wandb"
@@ -66,7 +66,8 @@ on_exit() {
     kill -INT \$WANDB_PID
     echo "Wandb process killed. waiting..."
     wait \$WANDB_PID
-    until [ ! -f /state/partition1/user/\$USER/wandb/run/mysqld/mysqld.sock ]; do sleep 1; done
+    # make sure process 'runsv' exists
+    while pgrep -x "runsv" > /dev/null ; do sleep 1; echo 'waiting';  done
     echo "Updating tar..."
     tar cfP ~/wandb/wandb\$(date +%Y_%m_%d_%H_%M_%S).tar /state/partition1/user/\$USER/wandb
 }

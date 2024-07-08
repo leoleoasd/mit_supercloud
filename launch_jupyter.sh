@@ -90,4 +90,4 @@ echo ""
 # replace target name in jupyter_url to PORTAL_FWNAME
 output_url=$(echo $jupyter_url | sed "s|$target_name|https://$forward_name.fn.txe1-portal.mit.edu/|")
 echo "Portal URL is: $output_url"
-
+echo "Jupyter URL is: $jupyter_url"
